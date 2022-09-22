@@ -138,7 +138,7 @@ const emptySearch = async (driver, dateArr) => {
         text = await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[2]/div')).getText();
 
         if (text != "×") {
-          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[1]/span')).getText();
+          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[3]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[1]/span')).getText();
           arr.push(arrtext);
         }
       }

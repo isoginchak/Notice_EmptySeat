@@ -96,7 +96,6 @@ const emptySearch = async (driver, dateArr) => {
   arr = [];
   for (i = 0; i < dateArr.length; i++) {
     await driver.findElement(By.xpath('//*[@id="calendar"]/div/ul[2]/li[' + dateArr[i]['li'] + ']')).click();
-    console.log(i);
     if (dateArr[i]['num'] != 1) {
       await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button')).click();
 
@@ -119,7 +118,7 @@ const emptySearch = async (driver, dateArr) => {
         text = await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[2]/div')).getText();
 
         if (text != "×") {
-          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[1]/span')).getText();
+          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[3]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[1]/span')).getText();
           arr.push(arrtext);
         }
       }
