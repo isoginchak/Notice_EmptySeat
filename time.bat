@@ -2,7 +2,7 @@
 
 
 rem 
-node sample3.js
+node formail.js
 timeout 600
 
 goto top

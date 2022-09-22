@@ -13,8 +13,6 @@ capabilities.set('chromeOptions', {
 // awaitを使うので、asyncで囲む
 const searchTicket = async () => {
 
-  var arr = [];
-
   //ブラウザ立ち上げ
   const driver = await new Builder()
     .withCapabilities(capabilities)
@@ -29,74 +27,46 @@ const searchTicket = async () => {
   // 別タブに移動
   const tabs = await driver.getAllWindowHandles();
   await driver.switchTo().window(tabs[1]);
+
+  var arr = [];
+
+  //numは1=>１公演 2=>2公演 3=>午前 4=>午後
+  //12月の配列
+  var decArr = [
+    { "li": "32", "date": "20221228", "num": 2 },
+    { "li": "33", "date": "20221229", "num": 2 },
+    { "li": "34", "date": "20221230", "num": 1 }
+  ]
+  //1月の配列
+  var janArr = [
+    { "li": "4", "date": "20230104", "num": 3 },
+    { "li": "5", "date": "20230105", "num": 1 },
+  ]
+
   // 12月をクリック
   await driver.findElement(By.xpath('//*[@id="list_box"]/table[2]/tbody/tr/td[4]/table/tbody/tr[8]/td/ul/li[2]/a')).click();
 
 
-  //12月29日
-  await driver.findElement(By.xpath('//*[@id="calendar"]/div/ul[2]/li[33]')).click();
-
-
-  //午前
-  await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button')).click();
-
-  for (i = 1; i < 3; i++) {
-    text = await driver.findElement(By.xpath('//*[@id="seat-content-202212291215"]/a[' + i + ']/div/p[2]/div')).getText();
-
-    if (text != "×") {
-      arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-202212291215"]/a[' + i + ']/div/p[1]/span')).getText();
-
-      arr.push(arrtext);
-    }
+  textarr = await emptySearch(driver, decArr);
+  if (textarr != "") {
+    textarr.forEach(element => {
+      arr.push(element);
+    });
   }
-  //午後
-  await driver.findElement(By.xpath('//*[@id="seat-list"]/div[3]/button')).click();
-  for (i = 1; i < 3; i++) {
-    text = await driver.findElement(By.xpath('//*[@id="seat-content-202212291815"]/a[' + i + ']/div/p[2]/div')).getText();
-
-    if (text != "×") {
-      arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-202212291815"]/a[' + i + ']/div/p[1]/span')).getText();
-      arr.push(arrtext);
-    }
-  }
-
-  //12月30日
-  await driver.findElement(By.xpath('//*[@id="calendar"]/div/ul[2]/li[34]')).click();
-
-  //午前
-  //await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button')).click(); ←開きっぱなしのためクリックしない
-  for (i = 1; i < 3; i++) {
-    text = await driver.findElement(By.xpath('//*[@id="seat-content-202212301215"]/a[' + i + ']/div/p[2]/div')).getText();
-
-    if (text != "×") {
-      arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-202212301215"]/a[' + i + ']/div/p[1]/span')).getText();
-      arr.push(arrtext);
-    }
-  }
-
 
   //最初に戻る
   await driver.findElement(By.xpath('//*[@id="contents_wrapper"]/table[3]/tbody/tr/td[2]/a')).click();
-
   // 1月をクリック
   await driver.findElement(By.xpath('//*[@id="list_box"]/table[2]/tbody/tr/td[5]/table/tbody/tr[8]/td/ul/li[2]/a')).click();
 
-  //1月4日
-  await driver.findElement(By.xpath('//*[@id="calendar"]/div/ul[2]/li[4]')).click();
-
-  //午前
-  await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button')).click();
-  for (i = 1; i < 3; i++) {
-    text = await driver.findElement(By.xpath('//*[@id="seat-content-202301041215"]/a[' + i + ']/div/p[2]/div')).getText();
-
-    if (text != "×") {
-      arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-202301041215"]/a[' + i + ']/div/p[1]/span')).getText();
-
-      //枚数確認
-      await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-202301041215"]/a[' + i + ']/div/p[1]/span')).click();
-      arr.push(arrtext);
-    }
+  textarr = await emptySearch(driver, janArr);
+  if (textarr != "") {
+    textarr.forEach(element => {
+      arr.push(element);
+    });
   }
+
+
 
   if (arr.length > 0) {
     //メール文の生成
@@ -109,8 +79,7 @@ const searchTicket = async () => {
     const Line = require('./line');
     const myLine = new Line();
 
-    // LINE Notify トークンセット
-    myLine.setToken("LINEのトークン");
+    myLine.setToken("LINE Notify トークンセット");
     myLine.notify(mailtext);
 
   }
@@ -121,3 +90,42 @@ const searchTicket = async () => {
 }
 
 searchTicket();
+
+const emptySearch = async (driver, dateArr) => {
+
+  arr = [];
+  for (i = 0; i < dateArr.length; i++) {
+    await driver.findElement(By.xpath('//*[@id="calendar"]/div/ul[2]/li[' + dateArr[i]['li'] + ']')).click();
+    console.log(i);
+    if (dateArr[i]['num'] != 1) {
+      await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button')).click();
+
+    }
+
+    if (dateArr[i]['num'] != 4) {  //午前
+      for (j = 1; j < 3; j++) {
+        text = await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1215"]/a[' + j + ']/div/p[2]/div')).getText();
+
+        if (text != "×") {
+          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1215"]/a[' + j + ']/div/p[1]/span')).getText();
+          arr.push(arrtext);
+
+        }
+      }
+    }
+    if (dateArr[i]['num'] == 2 || dateArr[i]['num'] == 4) {  //午後
+      await driver.findElement(By.xpath('//*[@id="seat-list"]/div[3]/button')).click();
+      for (j = 1; j < 3; j++) {
+        text = await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[2]/div')).getText();
+
+        if (text != "×") {
+          arrtext = await driver.findElement(By.xpath('//*[@id="seat-list"]/div[2]/button/span')).getText() + " " + await driver.findElement(By.xpath('//*[@id="seat-content-' + dateArr[i]['date'] + '1815"]/a[' + j + ']/div/p[1]/span')).getText();
+          arr.push(arrtext);
+        }
+      }
+    }
+
+
+  }
+  return arr;
+}
